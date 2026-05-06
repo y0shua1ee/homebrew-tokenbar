@@ -23,5 +23,6 @@ brew uninstall --cask tokenbar
 Notes:
 
 - Current cask ships the adhoc-signed app from `y0shua1ee/TokenBar` releases.
+- The cask clears the app quarantine attribute after install so the bundled `tokenbar` CLI can run.
 - The current app zip is arm64-only and requires macOS Sonoma or newer.
 - On first launch, macOS may require right-click → Open because the fork release is adhoc-signed rather than notarized.

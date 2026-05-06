@@ -13,6 +13,12 @@ cask "tokenbar" do
   app "TokenBar.app"
   binary "#{appdir}/TokenBar.app/Contents/Helpers/TokenBarCLI", target: "tokenbar"
 
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args:         ["-dr", "com.apple.quarantine", "#{appdir}/TokenBar.app"],
+                   must_succeed: false
+  end
+
   zap trash: [
     "~/.tokenbar",
     "~/Library/Application Scripts/com.y0shua1ee.tokenbar",
