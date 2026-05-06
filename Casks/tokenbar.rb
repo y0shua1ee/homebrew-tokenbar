@@ -2,8 +2,7 @@ cask "tokenbar" do
   version "0.24.4"
   sha256 "9f9d791bccbd98df86d54bc9e004c639957c4b3bc408de438fd7a7bf897e5410"
 
-  url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-#{version}-adhoc.zip",
-      verified: "github.com/y0shua1ee/TokenBar/"
+  url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-#{version}-adhoc.zip"
   name "TokenBar"
   desc "Menu bar usage monitor for AI coding assistants"
   homepage "https://github.com/y0shua1ee/TokenBar"
