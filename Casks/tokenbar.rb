@@ -1,6 +1,6 @@
 cask "tokenbar" do
-  version "0.24.5"
-  sha256 "d5733f9ab6b2cf4d6e16c964b6b1fe817afcbbf5a895f5b24776c23aa46266e1"
+  version "0.25.1"
+  sha256 "7641a1c775882e1078245ec7967f4ba53f61afd1edf2c9075c515a80b3a24b8b"
 
   url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-#{version}-adhoc.zip"
   name "TokenBar"
@@ -8,7 +8,7 @@ cask "tokenbar" do
   homepage "https://github.com/y0shua1ee/TokenBar"
 
   depends_on arch: :arm64
-  depends_on macos: ">= :sonoma"
+  depends_on macos: :sonoma
 
   app "TokenBar.app"
   binary "#{appdir}/TokenBar.app/Contents/Helpers/TokenBarCLI", target: "tokenbar"
