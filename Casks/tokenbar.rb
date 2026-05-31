@@ -1,6 +1,6 @@
 cask "tokenbar" do
-  version "0.31.0"
-  sha256 "3f8b00a0e7888b4824cdce1a24ac2ee2a00aaccacbe32241440b54e16aaef89f"
+  version "0.32.0"
+  sha256 "948d72c8db5fa47c7cf5f62ea56168555568199083d84d57f6d2c2c2b4c2c5fa"
 
   url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-#{version}-adhoc.zip"
   name "TokenBar"
