@@ -1,0 +1,137 @@
+name: Update formula
+run-name: ${{ inputs.request_id || format('update {0}', inputs.tag) }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: "Formula token to update when Formula/<formula>.rb exists."
+        required: false
+        type: string
+      tag:
+        description: "Release tag, for example v0.35.1."
+        required: true
+        type: string
+      repository:
+        description: "GitHub repository that owns release assets."
+        required: true
+        type: string
+      artifact_template:
+        description: "Formula artifact template. Reserved for future Formula/tokenbar.rb support."
+        required: false
+        type: string
+      target_aliases:
+        description: "Formula target aliases. Reserved for future Formula/tokenbar.rb support."
+        required: false
+        type: string
+      cask:
+        description: "Cask token to update."
+        required: false
+        type: string
+      cask_artifact:
+        description: "Cask release asset template, for example TokenBar-macos-universal-{version}.zip."
+        required: false
+        type: string
+      request_id:
+        description: "Caller-provided run marker."
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Update cask
+        env:
+          CASK: ${{ inputs.cask }}
+          CASK_ARTIFACT: ${{ inputs.cask_artifact }}
+          REPOSITORY: ${{ inputs.repository }}
+          TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$CASK" ]]; then
+            echo "No cask input supplied; skipping cask update."
+            exit 0
+          fi
+          if [[ -z "$CASK_ARTIFACT" ]]; then
+            echo "cask_artifact is required when cask is supplied." >&2
+            exit 1
+          fi
+          if [[ ! "$TAG" =~ ^v?[0-9A-Za-z._-]+$ ]]; then
+            echo "Invalid tag: $TAG" >&2
+            exit 1
+          fi
+          if [[ ! "$REPOSITORY" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+            echo "Invalid repository: $REPOSITORY" >&2
+            exit 1
+          fi
+
+          version="${TAG#v}"
+          cask_file="Casks/${CASK}.rb"
+          if [[ ! -f "$cask_file" ]]; then
+            echo "Missing cask file: $cask_file" >&2
+            exit 1
+          fi
+
+          asset="${CASK_ARTIFACT//\{version\}/$version}"
+          asset="${asset//\{tag\}/$TAG}"
+          url="https://github.com/${REPOSITORY}/releases/download/${TAG}/${asset}"
+          tmp="$(mktemp)"
+          curl -fsSL "$url" -o "$tmp"
+          sha="$(sha256sum "$tmp" | awk '{ print $1 }')"
+
+          CASK_FILE="$cask_file" \
+            VERSION="$version" \
+            SHA256="$sha" \
+            REPOSITORY="$REPOSITORY" \
+            TAG="$TAG" \
+            CASK_ARTIFACT="$CASK_ARTIFACT" \
+            ruby <<'RUBY'
+          file = ENV.fetch("CASK_FILE")
+          version = ENV.fetch("VERSION")
+          sha = ENV.fetch("SHA256")
+          repository = ENV.fetch("REPOSITORY")
+          tag = ENV.fetch("TAG")
+          artifact = ENV.fetch("CASK_ARTIFACT")
+
+          tag_expr = tag.start_with?("v") ? "v\#{version}" : "\#{version}"
+          artifact_expr = artifact
+            .gsub("{version}", "\#{version}")
+            .gsub("{tag}", tag_expr)
+          url = "https://github.com/#{repository}/releases/download/#{tag_expr}/#{artifact_expr}"
+
+          text = File.read(file)
+          text = text.sub(/version "[^"]+"/, "version \"#{version}\"")
+          text = text.sub(/sha256 "[^"]+"/, "sha256 \"#{sha}\"")
+          text = text.sub(%r{url "https://github\.com/[^"]+"}, "url \"#{url}\"")
+          File.write(file, text)
+          RUBY
+
+      - name: Commit changes
+        env:
+          CASK: ${{ inputs.cask }}
+          FORMULA: ${{ inputs.formula }}
+          TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$(git status --porcelain)" ]]; then
+            echo "No tap changes to commit."
+            exit 0
+          fi
+
+          version="${TAG#v}"
+          token="${CASK:-${FORMULA:-tokenbar}}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks Formula 2>/dev/null || git add Casks
+          git commit -m "${token}: bump to ${version}"
+          git push
