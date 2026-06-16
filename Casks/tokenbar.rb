@@ -1,8 +1,8 @@
 cask "tokenbar" do
-  version "0.33.2"
-  sha256 "9ba55b7ac182b77f45e03103a6ed382b87302d84e0758cebb7eba2fc30019735"
+  version "0.35.1"
+  sha256 "bbc8d846e20baa1fae1259d129d0f5b116f48d5ac852c17c08a64c1683d1d1ba"
 
-  url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-#{version}-adhoc.zip"
+  url "https://github.com/y0shua1ee/TokenBar/releases/download/v#{version}/TokenBar-macos-universal-#{version}.zip"
   name "TokenBar"
   desc "Menu bar usage monitor for AI coding assistants"
   homepage "https://github.com/y0shua1ee/TokenBar"
@@ -29,6 +29,7 @@ cask "tokenbar" do
     "~/Library/Caches/TokenBar",
     "~/Library/Containers/com.y0shua1ee.tokenbar",
     "~/Library/Containers/com.y0shua1ee.tokenbar.widget",
+    "~/Library/Group Containers/group.com.y0shua1ee.tokenbar",
     "~/Library/Group Containers/Y5PE65HELJ.com.y0shua1ee.tokenbar",
     "~/Library/HTTPStorages/com.y0shua1ee.tokenbar",
     "~/Library/HTTPStorages/com.y0shua1ee.tokenbar.binarycookies",
